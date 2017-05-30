@@ -1,0 +1,7 @@
+[credentials]
+username = your-username
+password = your-password
+[connection]
+host = rabbit-host
+port = rabbit-port
+vhost = rabbit-virtual-host
