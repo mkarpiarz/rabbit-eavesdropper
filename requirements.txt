@@ -1,0 +1,4 @@
+argparse==1.2.1
+configparser==3.5.0
+pika==0.10.0
+wsgiref==0.1.2
