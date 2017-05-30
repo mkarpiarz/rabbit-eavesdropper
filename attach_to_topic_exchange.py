@@ -20,20 +20,20 @@ channel = connection.channel()
 
 # create an eavesdropping queue using wildcards
 # and attach the queue to the exchange you want to listen to
-myqueue='event.sample.#'
-eavexchange='ceilometer'
-channel.queue_declare(queue=myqueue)
-channel.queue_bind(queue=myqueue, exchange=eavexchange, routing_key=myqueue)
+eavqueue = config.get('eavesdrop', 'queue')
+eavexchange = config.get('eavesdrop', 'exchange')
+channel.queue_declare(queue=eavqueue)
+channel.queue_bind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
 
 def callback(ch, method, properties, body):
     print(" [x] Received %r" % body)
 
-channel.basic_consume(callback, queue=myqueue, no_ack=True)
+channel.basic_consume(callback, queue=eavqueue, no_ack=True)
 
 print(' [*] Waiting for messages. To exit press CTRL+C')
 channel.start_consuming()
 
 # clean up the queue, unbind it form the exchange and delete it
-channel.queue_purge(queue=myqueue)
-channel.queue_unbind(queue=myqueue, exchange=eavexchange, routing_key=myqueue)
-channel.queue_delete(queue=myqueue,if_unused=True, if_empty=True)
+channel.queue_purge(queue=eavqueue)
+channel.queue_unbind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
+channel.queue_delete(queue=eavqueue,if_unused=True, if_empty=True)

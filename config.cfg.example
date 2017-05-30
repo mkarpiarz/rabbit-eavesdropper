@@ -5,3 +5,6 @@ password = your-password
 host = rabbit-host
 port = rabbit-port
 vhost = rabbit-virtual-host
+[eavesdrop]
+queue = event.sample.#
+exchange = ceilometer
