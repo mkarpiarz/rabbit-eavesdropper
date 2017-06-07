@@ -34,9 +34,14 @@ def callback(ch, method, properties, body):
 channel.basic_consume(callback, queue=eavqueue, no_ack=True)
 
 print(' [*] Waiting for messages. To exit press CTRL+C')
-channel.start_consuming()
+try:
+    channel.start_consuming()
+except KeyboardInterrupt:
+    channel.stop_consuming()
 
 # clean up the queue, unbind it form the exchange and delete it
 channel.queue_purge(queue=eavqueue)
 channel.queue_unbind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
 channel.queue_delete(queue=eavqueue,if_unused=True, if_empty=True)
+
+connection.close()
