@@ -26,7 +26,10 @@ channel.queue_declare(queue=eavqueue)
 channel.queue_bind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
 
 def callback(ch, method, properties, body):
-    print(" [x] Received %r" % body)
+    print(" [x] Received a message")
+    print(" [x] Method: %r" % method)
+    print(" [x] Properties: %r" % properties)
+    print(" [x] Body %r" % body)
 
 channel.basic_consume(callback, queue=eavqueue, no_ack=True)
 
