@@ -22,7 +22,7 @@ channel = connection.channel()
 # and attach the queue to the exchange you want to listen to
 eavqueue = config.get('eavesdrop', 'queue')
 eavexchange = config.get('eavesdrop', 'exchange')
-channel.queue_declare(queue=eavqueue)
+channel.queue_declare(queue=eavqueue, auto_delete=True)
 channel.queue_bind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
 
 def callback(ch, method, properties, body):
@@ -38,10 +38,5 @@ try:
     channel.start_consuming()
 except KeyboardInterrupt:
     channel.stop_consuming()
-
-# clean up the queue, unbind it form the exchange and delete it
-channel.queue_purge(queue=eavqueue)
-channel.queue_unbind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
-channel.queue_delete(queue=eavqueue,if_unused=True, if_empty=True)
 
 connection.close()
