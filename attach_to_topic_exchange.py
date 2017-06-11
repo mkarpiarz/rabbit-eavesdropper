@@ -37,16 +37,15 @@ channel.queue_declare(queue=eavqueue, **args)
 channel.queue_bind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
 
 def callback(ch, method, properties, body):
+    print("---------------------------------------------------------------")
     print(" [x] Received a message")
-    print(" Frame:" )
-    print( method.consumer_tag )
-    pprint.pprint( method )
-    print( "Envelope:" )
-    pprint.pprint( properties )
-    print(" Body:" )
+    print(" [x] FRAME:")
+    pprint.pprint( method.__dict__ )
+    print(" [x] ENVELOPE:")
+    pprint.pprint( properties.__dict__ )
+    print(" [x] BODY:")
     # parse string into dict and display
     pprint.pprint( ast.literal_eval(body) )
-    print("------------------------------------------------")
 
 channel.basic_consume(callback, queue=eavqueue, no_ack=True)
 
