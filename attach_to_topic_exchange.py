@@ -18,11 +18,20 @@ connection = pika.BlockingConnection(parameters)
 
 channel = connection.channel()
 
-# create an eavesdropping queue using wildcards
-# and attach the queue to the exchange you want to listen to
+# get details of the queue and the exchange from the config file
 eavqueue = config.get('eavesdrop', 'queue')
+queue_exists = True if config.get('eavesdrop', 'queue_exists') in ('y', 'yes') else False
 eavexchange = config.get('eavesdrop', 'exchange')
-channel.queue_declare(queue=eavqueue, auto_delete=True)
+
+# declare the queue
+args = {}
+if queue_exists:
+    print("WARNING: Attaching to an existing queue!")
+    args = {"passive": True}
+else:
+    args = {"auto_delete": True}
+channel.queue_declare(queue=eavqueue, **args)
+
 channel.queue_bind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
 
 def callback(ch, method, properties, body):
