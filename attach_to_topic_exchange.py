@@ -36,7 +36,7 @@ channel.queue_declare(queue=eavqueue, **args)
 
 channel.queue_bind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
 
-def callback(ch, method, properties, body):
+def consumer_callback(ch, method, properties, body):
     print("---------------------------------------------------------------")
     print(" [x] Received a message")
     print(" [x] FRAME:")
@@ -47,7 +47,7 @@ def callback(ch, method, properties, body):
     # parse string into dict and display
     pprint.pprint( ast.literal_eval(body) )
 
-channel.basic_consume(callback, queue=eavqueue, no_ack=True)
+channel.basic_consume(consumer_callback, queue=eavqueue, no_ack=True)
 
 print(' [*] Waiting for messages. To exit press CTRL+C')
 try:
