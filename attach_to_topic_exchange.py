@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import pika
 import ConfigParser
+import pprint
+import ast
 
 # get config from the config file
 config = ConfigParser.ConfigParser()
@@ -35,10 +37,15 @@ channel.queue_declare(queue=eavqueue, **args)
 channel.queue_bind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
 
 def callback(ch, method, properties, body):
+    print("---------------------------------------------------------------")
     print(" [x] Received a message")
-    print(" [x] Method: %r" % method)
-    print(" [x] Properties: %r" % properties)
-    print(" [x] Body %r" % body)
+    print(" [x] FRAME:")
+    pprint.pprint( method.__dict__ )
+    print(" [x] ENVELOPE:")
+    pprint.pprint( properties.__dict__ )
+    print(" [x] BODY:")
+    # parse string into dict and display
+    pprint.pprint( ast.literal_eval(body) )
 
 channel.basic_consume(callback, queue=eavqueue, no_ack=True)
 
