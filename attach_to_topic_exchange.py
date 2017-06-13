@@ -28,7 +28,12 @@ eavexchange = config.get('eavesdrop', 'exchange')
 # declare the queue
 args = {}
 if queue_exists:
-    print("WARNING: Attaching to an existing queue!")
+    # confirm you want to attach to an existing queue
+    confirm_attach = str( raw_input("WARNING: Are you sure you want to attach to an existing queue? [y/N] ") )
+    print confirm_attach
+    if confirm_attach != "y" and confirm_attach != "yes":
+        print("INFO: Attachment attempt cancelled by the user. Will exit now.")
+        exit(1)
     args = {"passive": True}
 else:
     args = {"auto_delete": True}
@@ -38,7 +43,7 @@ channel.queue_bind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
 
 def consumer_callback(ch, method, properties, body):
     print("---------------------------------------------------------------")
-    print(" [x] Received a message")
+    print(" [x] DING! Received a message!")
     print(" [x] FRAME:")
     pprint.pprint( method.__dict__ )
     print(" [x] ENVELOPE:")
