@@ -7,4 +7,5 @@ port = rabbit-port
 vhost = rabbit-virtual-host
 [eavesdrop]
 queue = event.sample.#
+queue_exists = yes/no
 exchange = ceilometer

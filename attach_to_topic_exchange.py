@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import pika
 import ConfigParser
+import pprint
+import ast
 
 # get config from the config file
 config = ConfigParser.ConfigParser()
@@ -18,30 +20,44 @@ connection = pika.BlockingConnection(parameters)
 
 channel = connection.channel()
 
-# create an eavesdropping queue using wildcards
-# and attach the queue to the exchange you want to listen to
+# get details of the queue and the exchange from the config file
 eavqueue = config.get('eavesdrop', 'queue')
+queue_exists = True if config.get('eavesdrop', 'queue_exists') in ('y', 'yes') else False
 eavexchange = config.get('eavesdrop', 'exchange')
-channel.queue_declare(queue=eavqueue)
+
+# declare the queue
+args = {}
+if queue_exists:
+    # confirm you want to attach to an existing queue
+    confirm_attach = str( raw_input("WARNING: Are you sure you want to attach to an existing queue? [y/N] ") )
+    print confirm_attach
+    if confirm_attach != "y" and confirm_attach != "yes":
+        print("INFO: Attachment attempt cancelled by the user. Will exit now.")
+        exit(1)
+    args = {"passive": True}
+else:
+    args = {"auto_delete": True}
+channel.queue_declare(queue=eavqueue, **args)
+
 channel.queue_bind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
 
-def callback(ch, method, properties, body):
-    print(" [x] Received a message")
-    print(" [x] Method: %r" % method)
-    print(" [x] Properties: %r" % properties)
-    print(" [x] Body %r" % body)
+def consumer_callback(ch, method, properties, body):
+    print("---------------------------------------------------------------")
+    print(" [x] DING! Received a message!")
+    print(" [x] FRAME:")
+    pprint.pprint( method.__dict__ )
+    print(" [x] ENVELOPE:")
+    pprint.pprint( properties.__dict__ )
+    print(" [x] BODY:")
+    # parse string into dict and display
+    pprint.pprint( ast.literal_eval(body) )
 
-channel.basic_consume(callback, queue=eavqueue, no_ack=True)
+channel.basic_consume(consumer_callback, queue=eavqueue, no_ack=True)
 
 print(' [*] Waiting for messages. To exit press CTRL+C')
 try:
     channel.start_consuming()
 except KeyboardInterrupt:
     channel.stop_consuming()
-
-# clean up the queue, unbind it form the exchange and delete it
-channel.queue_purge(queue=eavqueue)
-channel.queue_unbind(queue=eavqueue, exchange=eavexchange, routing_key=eavqueue)
-channel.queue_delete(queue=eavqueue,if_unused=True, if_empty=True)
 
 connection.close()
